@@ -20,6 +20,29 @@ app.use(cors({
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/schooldb');
 
+//passport
+var passport = require('passport');
+var session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
+//this session provide lot of functionality to us but we used few of them right over here
+app.use(session({
+  name:'myname.shreya',
+  resave:false, //because we dont want to save the object for every request untill unless it is changed
+  saveUninitialized:false, //here we dont want to save the request untill it will successfully login and it is with the help of passportjs
+  secret:'secret',
+  cookie:{
+    maxAge:36000000,
+    httpOnly:false,
+    secure:false
+  },
+  store: new MongoStore({ mongooseConnection: mongoose.connection })
+}));
+require('./passport-config'); //it will bring the complete code in app.js and then it will initialize the passport
+app.use(passport.initialize()); //by mistake here creating a passport session before initialize. Which will fix later in video.
+app.use(passport.session());
+
+
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
